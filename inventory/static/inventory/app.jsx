@@ -1,0 +1,397 @@
+const { useEffect, useState } = React;
+
+const defaultForm = {
+  title: "",
+  property_type: "rumah",
+  listing_mode: "sell",
+  price: "",
+  width: "",
+  length: "",
+  floors: 1,
+  area: "",
+  owner_whatsapp_number: "",
+  description: "",
+};
+
+function InventoryApp() {
+  const [formData, setFormData] = useState(defaultForm);
+  const [filters, setFilters] = useState({
+    property_type: "",
+    listing_mode: "",
+    area: "",
+    min_price: "",
+    max_price: "",
+    sort: "-created_at",
+  });
+  const [properties, setProperties] = useState([]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    num_pages: 1,
+    total_items: 0,
+    has_next: false,
+    has_previous: false,
+  });
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [uploadFiles, setUploadFiles] = useState({});
+  const [selectedPhotoIds, setSelectedPhotoIds] = useState({});
+  const [collageLinks, setCollageLinks] = useState({});
+
+  const propertyTypeOptions = [
+    { value: "rumah", label: "Rumah" },
+    { value: "ruko", label: "Ruko" },
+    { value: "gudang", label: "Gudang" },
+  ];
+
+  const listingModeOptions = [
+    { value: "sell", label: "Sell" },
+    { value: "rent", label: "Rent" },
+  ];
+
+  const sortOptions = [
+    { value: "-created_at", label: "Newest" },
+    { value: "created_at", label: "Oldest" },
+    { value: "price", label: "Price: Low to High" },
+    { value: "-price", label: "Price: High to Low" },
+    { value: "width", label: "Width: Low to High" },
+    { value: "-width", label: "Width: High to Low" },
+    { value: "length", label: "Length: Low to High" },
+    { value: "-length", label: "Length: High to Low" },
+    { value: "-floors", label: "Floors: High to Low" },
+  ];
+
+  async function fetchProperties(nextPage = page) {
+    setLoading(true);
+    setErrorMessage("");
+    try {
+      const params = new URLSearchParams();
+      params.set("page", String(nextPage));
+      params.set("sort", filters.sort);
+      Object.entries(filters).forEach(([key, value]) => {
+        if (key !== "sort" && value !== "") {
+          params.set(key, value);
+        }
+      });
+      const response = await fetch(`/api/properties/?${params.toString()}`);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to load properties.");
+      }
+      setProperties(data.results);
+      setPagination(data.pagination);
+      setPage(data.pagination.page);
+      setStatusMessage(`Showing ${data.results.length} of ${data.pagination.total_items} properties.`);
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchProperties(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.property_type, filters.listing_mode, filters.area, filters.min_price, filters.max_price, filters.sort]);
+
+  async function createProperty(event) {
+    event.preventDefault();
+    setErrorMessage("");
+    setStatusMessage("");
+    try {
+      const response = await fetch("/api/properties/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create property.");
+      }
+      setFormData(defaultForm);
+      setStatusMessage(`Property "${data.title}" created.`);
+      fetchProperties(1);
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  }
+
+  async function uploadPropertyPhotos(propertyId) {
+    const files = uploadFiles[propertyId];
+    if (!files || files.length === 0) {
+      setErrorMessage("Select one or more photos first.");
+      return;
+    }
+    const payload = new FormData();
+    files.forEach((file) => payload.append("photos", file));
+    try {
+      const response = await fetch(`/api/properties/${propertyId}/photos/`, {
+        method: "POST",
+        body: payload,
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to upload photos.");
+      }
+      setStatusMessage(`${data.photos.length} photo(s) uploaded.`);
+      setUploadFiles((prev) => ({ ...prev, [propertyId]: [] }));
+      fetchProperties(page);
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  }
+
+  async function deletePhoto(photoId) {
+    try {
+      const response = await fetch(`/api/photos/${photoId}/`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+      if (!response.ok || !data.deleted) {
+        throw new Error(data.error || "Failed to delete photo.");
+      }
+      setStatusMessage("Photo deleted.");
+      fetchProperties(page);
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  }
+
+  function togglePhotoSelection(propertyId, photoId) {
+    const currentIds = selectedPhotoIds[propertyId] || [];
+    const exists = currentIds.includes(photoId);
+    const nextIds = exists
+      ? currentIds.filter((id) => id !== photoId)
+      : [...currentIds, photoId];
+    setSelectedPhotoIds((prev) => ({ ...prev, [propertyId]: nextIds }));
+  }
+
+  async function createCollage(propertyId) {
+    const photoIds = selectedPhotoIds[propertyId] || [];
+    try {
+      const response = await fetch(`/api/properties/${propertyId}/collage/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photo_ids: photoIds }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create collage.");
+      }
+      setCollageLinks((prev) => ({
+        ...prev,
+        [propertyId]: {
+          collageUrl: data.collage_url,
+          whatsappUrl: data.whatsapp_share_url,
+        },
+      }));
+      setStatusMessage("Collage created for WhatsApp sharing.");
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  }
+
+  return (
+    <div>
+      <section className="panel">
+        <h2>Add Property</h2>
+        <form onSubmit={createProperty} className="grid columns-4">
+          <div>
+            <label>Title</label>
+            <input value={formData.title} onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))} required />
+          </div>
+          <div>
+            <label>Type</label>
+            <select value={formData.property_type} onChange={(e) => setFormData((prev) => ({ ...prev, property_type: e.target.value }))}>
+              {propertyTypeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label>Rent or Sell</label>
+            <select value={formData.listing_mode} onChange={(e) => setFormData((prev) => ({ ...prev, listing_mode: e.target.value }))}>
+              {listingModeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label>Price</label>
+            <input type="number" step="0.01" value={formData.price} onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))} required />
+          </div>
+          <div>
+            <label>Width</label>
+            <input type="number" step="0.01" value={formData.width} onChange={(e) => setFormData((prev) => ({ ...prev, width: e.target.value }))} required />
+          </div>
+          <div>
+            <label>Length</label>
+            <input type="number" step="0.01" value={formData.length} onChange={(e) => setFormData((prev) => ({ ...prev, length: e.target.value }))} required />
+          </div>
+          <div>
+            <label>Floors</label>
+            <input type="number" min="1" value={formData.floors} onChange={(e) => setFormData((prev) => ({ ...prev, floors: e.target.value }))} required />
+          </div>
+          <div>
+            <label>Area</label>
+            <input value={formData.area} onChange={(e) => setFormData((prev) => ({ ...prev, area: e.target.value }))} required />
+          </div>
+          <div>
+            <label>Owner WhatsApp</label>
+            <input value={formData.owner_whatsapp_number} onChange={(e) => setFormData((prev) => ({ ...prev, owner_whatsapp_number: e.target.value }))} required />
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label>Description</label>
+            <textarea rows="2" value={formData.description} onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}></textarea>
+          </div>
+          <div>
+            <button type="submit">Save Property</button>
+          </div>
+        </form>
+      </section>
+
+      <section className="panel">
+        <h2>Filter & Sort (10 properties per page)</h2>
+        <div className="grid columns-4">
+          <div>
+            <label>Type</label>
+            <select value={filters.property_type} onChange={(e) => setFilters((prev) => ({ ...prev, property_type: e.target.value }))}>
+              <option value="">All</option>
+              {propertyTypeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label>Listing Mode</label>
+            <select value={filters.listing_mode} onChange={(e) => setFilters((prev) => ({ ...prev, listing_mode: e.target.value }))}>
+              <option value="">All</option>
+              {listingModeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label>Area contains</label>
+            <input value={filters.area} onChange={(e) => setFilters((prev) => ({ ...prev, area: e.target.value }))} />
+          </div>
+          <div>
+            <label>Sort</label>
+            <select value={filters.sort} onChange={(e) => setFilters((prev) => ({ ...prev, sort: e.target.value }))}>
+              {sortOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label>Min Price</label>
+            <input type="number" step="0.01" value={filters.min_price} onChange={(e) => setFilters((prev) => ({ ...prev, min_price: e.target.value }))} />
+          </div>
+          <div>
+            <label>Max Price</label>
+            <input type="number" step="0.01" value={filters.max_price} onChange={(e) => setFilters((prev) => ({ ...prev, max_price: e.target.value }))} />
+          </div>
+          <div className="actions-inline">
+            <button className="light" type="button" onClick={() => {
+              setFilters({
+                property_type: "",
+                listing_mode: "",
+                area: "",
+                min_price: "",
+                max_price: "",
+                sort: "-created_at",
+              });
+              setPage(1);
+            }}>
+              Reset
+            </button>
+            <button type="button" onClick={() => fetchProperties(1)}>Apply</button>
+          </div>
+        </div>
+      </section>
+
+      {errorMessage && <p className="status-error">{errorMessage}</p>}
+      {statusMessage && <p className="status-success">{statusMessage}</p>}
+
+      <section className="panel">
+        <h2>Property Inventory</h2>
+        {loading && <p className="muted">Loading...</p>}
+        {!loading && properties.length === 0 && <p className="muted">No properties found.</p>}
+        <div className="grid columns-3">
+          {properties.map((property) => (
+            <article key={property.id} className="property-card">
+              <div className="property-header">
+                <h3>{property.title}</h3>
+                <span>{property.property_type_label}</span>
+              </div>
+              <p className="property-meta">
+                {property.listing_mode_label} | Price: {property.price}<br />
+                Size: {property.width} x {property.length} | Floors: {property.floors}<br />
+                Area: {property.area}<br />
+                Owner WA: {property.owner_whatsapp_number}
+              </p>
+              <div className="photo-row">
+                {property.photos.map((photo) => (
+                  <div className="photo-item" key={photo.id}>
+                    <img src={photo.image_url} alt={`Property ${property.id} photo ${photo.id}`} />
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={(selectedPhotoIds[property.id] || []).includes(photo.id)}
+                        onChange={() => togglePhotoSelection(property.id, photo.id)}
+                      />
+                      Use in collage
+                    </label>
+                    <button className="danger" type="button" onClick={() => deletePhoto(photo.id)}>
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="grid" style={{ marginTop: "12px" }}>
+                <div>
+                  <label>Upload Photos</label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => {
+                      setUploadFiles((prev) => ({
+                        ...prev,
+                        [property.id]: Array.from(e.target.files || []),
+                      }));
+                    }}
+                  />
+                </div>
+                <div className="actions-inline">
+                  <button type="button" onClick={() => uploadPropertyPhotos(property.id)}>
+                    Upload
+                  </button>
+                  <button className="secondary" type="button" onClick={() => createCollage(property.id)}>
+                    Create WhatsApp Collage
+                  </button>
+                </div>
+                {collageLinks[property.id] && (
+                  <div className="actions-inline">
+                    <a href={collageLinks[property.id].collageUrl} target="_blank" rel="noreferrer">
+                      <button type="button" className="light">Open Collage</button>
+                    </a>
+                    <a href={collageLinks[property.id].whatsappUrl} target="_blank" rel="noreferrer">
+                      <button type="button">Send via WhatsApp</button>
+                    </a>
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div className="pagination">
+          <button type="button" className="light" disabled={!pagination.has_previous} onClick={() => fetchProperties(page - 1)}>
+            Previous
+          </button>
+          <span className="muted">
+            Page {pagination.page} / {pagination.num_pages} (Total: {pagination.total_items})
+          </span>
+          <button type="button" className="light" disabled={!pagination.has_next} onClick={() => fetchProperties(page + 1)}>
+            Next
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("inventory-root"));
+root.render(<InventoryApp />);
