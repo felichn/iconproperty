@@ -211,9 +211,15 @@ function InventoryApp() {
     const greetingLabel = getTimeGreetingLabel();
     const propertyType = property.property_type_label || property.property_type || "Properti";
     const area = property.area || "-";
-    const listingMode = (property.listing_mode_label || property.listing_mode || "-").toLowerCase();
+    const listingModeValue = (property.listing_mode || "").toLowerCase();
+    const listingModeText =
+      listingModeValue === "sell"
+        ? "dijual"
+        : listingModeValue === "rent"
+          ? "disewakan"
+          : "dipasarkan";
     const text = encodeURIComponent(
-      `Halo, saya tertarik dengan properti "${property.title}". Apakah masih tersedia?\n\nSelamat ${greetingLabel}, saya Felicia dari Icon Property.\n${propertyType} di ${area} mau ${listingMode} nett di harga brp?`
+      `Halo, saya tertarik dengan properti "${property.title}". Apakah masih tersedia?\n\nSelamat ${greetingLabel}, saya Felicia dari Icon Property.\n${propertyType} di ${area} ${listingModeText} nett di harga berapa?`
     );
     return `https://wa.me/${phoneNumber}?text=${text}`;
   }
