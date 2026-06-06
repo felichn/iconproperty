@@ -219,7 +219,7 @@ function InventoryApp() {
           ? "disewakan"
           : "dipasarkan";
     const text = encodeURIComponent(
-      `Halo, saya tertarik dengan properti "${property.title}". Apakah masih tersedia?\n\nSelamat ${greetingLabel}, saya Felicia dari Icon Property.\n${propertyType} di ${area} ${listingModeText} nett di harga berapa?`
+      `Selamat ${greetingLabel}, saya Felicia dari Icon Property.\n${propertyType} di ${area} ${listingModeText} nett di harga berapa?`
     );
     return `https://wa.me/${phoneNumber}?text=${text}`;
   }
