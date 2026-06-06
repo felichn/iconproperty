@@ -192,13 +192,28 @@ function InventoryApp() {
     }
   }
 
+  function getTimeGreetingLabel() {
+    const hour = new Date().getHours();
+    if (hour < 11) {
+      return "Pagi";
+    }
+    if (hour < 18) {
+      return "Siang";
+    }
+    return "Malam";
+  }
+
   function buildOwnerWhatsappLink(property) {
     const phoneNumber = (property.owner_whatsapp_number || "").replace(/\D/g, "");
     if (!phoneNumber) {
       return null;
     }
+    const greetingLabel = getTimeGreetingLabel();
+    const propertyType = property.property_type_label || property.property_type || "Properti";
+    const area = property.area || "-";
+    const listingMode = (property.listing_mode_label || property.listing_mode || "-").toLowerCase();
     const text = encodeURIComponent(
-      `Halo, saya tertarik dengan properti "${property.title}". Apakah masih tersedia?`
+      `Halo, saya tertarik dengan properti "${property.title}". Apakah masih tersedia?\n\nSelamat ${greetingLabel}, saya Felicia dari Icon Property.\n${propertyType} di ${area} mau ${listingMode} nett di harga brp?`
     );
     return `https://wa.me/${phoneNumber}?text=${text}`;
   }
@@ -320,7 +335,9 @@ function InventoryApp() {
         {loading && <p className="muted">Loading...</p>}
         {!loading && properties.length === 0 && <p className="muted">No properties found.</p>}
         <div className="grid columns-3">
-          {properties.map((property) => (
+          {properties.map((property) => {
+            const ownerWhatsappLink = buildOwnerWhatsappLink(property);
+            return (
             <article key={property.id} className="property-card">
               <div className="property-header">
                 <h3>{property.title}</h3>
@@ -332,9 +349,9 @@ function InventoryApp() {
                 Area: {property.area}<br />
                 Owner WA: {property.owner_whatsapp_number}
               </p>
-              {buildOwnerWhatsappLink(property) ? (
+              {ownerWhatsappLink ? (
                 <div className="actions-inline">
-                  <a href={buildOwnerWhatsappLink(property)} target="_blank" rel="noreferrer">
+                  <a href={ownerWhatsappLink} target="_blank" rel="noreferrer">
                     <button type="button">Contact Owner via WhatsApp</button>
                   </a>
                 </div>
@@ -394,7 +411,8 @@ function InventoryApp() {
                 )}
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
 
         <div className="pagination">
