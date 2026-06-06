@@ -8,12 +8,18 @@ const defaultForm = {
   width: "",
   length: "",
   floors: 1,
-  area: "",
+  area: "Villa Pasir Putih",
   owner_whatsapp_number: "",
   description: "",
 };
 
 function InventoryApp() {
+  const areaOptionsByPropertyType = {
+    rumah: ["Villa Pasir Putih"],
+    gudang: ["Gudang Bizpark"],
+    ruko: ["Hollywood", "Broadway", "Manhattan"],
+  };
+
   const [formData, setFormData] = useState(defaultForm);
   const [filters, setFilters] = useState({
     property_type: "",
@@ -204,7 +210,18 @@ function InventoryApp() {
         <form onSubmit={createProperty} className="grid columns-4">
           <div>
             <label>Type</label>
-            <select value={formData.property_type} onChange={(e) => setFormData((prev) => ({ ...prev, property_type: e.target.value }))}>
+            <select
+              value={formData.property_type}
+              onChange={(e) => {
+                const selectedType = e.target.value;
+                const areaOptions = areaOptionsByPropertyType[selectedType] || [];
+                setFormData((prev) => ({
+                  ...prev,
+                  property_type: selectedType,
+                  area: areaOptions[0] || "",
+                }));
+              }}
+            >
               {propertyTypeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </div>
@@ -244,7 +261,17 @@ function InventoryApp() {
           </div>
           <div>
             <label>Area</label>
-            <input value={formData.area} onChange={(e) => setFormData((prev) => ({ ...prev, area: e.target.value }))} required />
+            <select
+              value={formData.area}
+              onChange={(e) => setFormData((prev) => ({ ...prev, area: e.target.value }))}
+              required
+            >
+              {(areaOptionsByPropertyType[formData.property_type] || []).map((areaOption) => (
+                <option key={areaOption} value={areaOption}>
+                  {areaOption}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label>Owner WhatsApp</label>
