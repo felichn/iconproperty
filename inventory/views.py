@@ -1,24 +1,35 @@
 import json
-import math
-import uuid
+import zipfile
 from decimal import Decimal, InvalidOperation
-from pathlib import Path
+from io import BytesIO
 from urllib.parse import quote_plus
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage, Paginator
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils.text import slugify
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from PIL import Image
 
 from .models import Property, PropertyPhoto
 
 
 def inventory_page(request):
     return render(request, "inventory/index.html")
+
+
+def property_public_page(request, property_id):
+    property_obj = get_object_or_404(Property.objects.prefetch_related("photos"), pk=property_id)
+    return render(
+        request,
+        "inventory/property_detail.html",
+        {
+            "property": property_obj,
+            "photos": property_obj.photos.all(),
+        },
+    )
 
 
 def _parse_json_body(request):
@@ -61,6 +72,12 @@ def _serialize_photo(photo, request):
 
 def _serialize_property(property_obj, request):
     photos = list(property_obj.photos.all())
+    property_page_url = request.build_absolute_uri(
+        reverse("property-public-page", args=[property_obj.id])
+    )
+    download_photos_url = request.build_absolute_uri(
+        reverse("property-photo-download-api", args=[property_obj.id])
+    )
     return {
         "id": property_obj.id,
         "title": property_obj.title,
@@ -78,6 +95,8 @@ def _serialize_property(property_obj, request):
         "created_at": property_obj.created_at.isoformat(),
         "updated_at": property_obj.updated_at.isoformat(),
         "photos": [_serialize_photo(photo, request) for photo in photos],
+        "property_page_url": property_page_url,
+        "download_photos_url": download_photos_url,
         "primary_photo_url": (
             request.build_absolute_uri(photos[0].image.url) if photos else None
         ),
@@ -266,65 +285,59 @@ def property_photo_delete_api(request, photo_id):
     return JsonResponse({"deleted": True})
 
 
-@require_http_methods(["POST"])
+@require_http_methods(["GET"])
 @csrf_exempt
-def property_collage_api(request, property_id):
+def property_share_links_api(request, property_id):
     property_obj = get_object_or_404(Property.objects.prefetch_related("photos"), pk=property_id)
-    payload = {}
-    if request.body:
-        try:
-            payload = _parse_json_body(request)
-        except ValueError:
-            return JsonResponse({"error": "Invalid JSON body."}, status=400)
-
-    selected_photo_ids = payload.get("photo_ids")
-    photos = property_obj.photos.all()
-    if isinstance(selected_photo_ids, list) and selected_photo_ids:
-        photos = photos.filter(id__in=selected_photo_ids)
-    photos = list(photos)
-
-    if not photos:
-        return JsonResponse({"error": "No property photos available."}, status=400)
-
-    images = []
-    for photo in photos:
-        try:
-            with Image.open(photo.image.path) as img:
-                images.append(img.convert("RGB"))
-        except (FileNotFoundError, OSError):
-            continue
-
-    if not images:
-        return JsonResponse({"error": "Uploaded images could not be read."}, status=400)
-
-    cell_size = 900
-    cols = min(3, len(images))
-    rows = math.ceil(len(images) / cols)
-    collage = Image.new("RGB", (cols * cell_size, rows * cell_size), color=(248, 248, 248))
-
-    for index, image in enumerate(images):
-        image.thumbnail((cell_size - 20, cell_size - 20))
-        x_offset = (index % cols) * cell_size + (cell_size - image.width) // 2
-        y_offset = (index // cols) * cell_size + (cell_size - image.height) // 2
-        collage.paste(image, (x_offset, y_offset))
-
-    collages_dir = Path(settings.MEDIA_ROOT) / "collages"
-    collages_dir.mkdir(parents=True, exist_ok=True)
-    filename = f"{uuid.uuid4().hex}.jpg"
-    saved_path = collages_dir / filename
-    collage.save(saved_path, format="JPEG", quality=90)
-
-    collage_url = f"{settings.MEDIA_URL}collages/{filename}"
-    absolute_collage_url = request.build_absolute_uri(collage_url)
-    whatsapp_text = quote_plus(
-        f"Property photo collage for {property_obj.title}: {absolute_collage_url}"
+    property_page_url = request.build_absolute_uri(
+        reverse("property-public-page", args=[property_obj.id])
     )
-
+    download_photos_url = request.build_absolute_uri(
+        reverse("property-photo-download-api", args=[property_obj.id])
+    )
+    whatsapp_text = quote_plus(
+        (
+            f"Selamat, berikut halaman foto properti {property_obj.title} di {property_obj.area}: "
+            f"{property_page_url}. Download semua foto di: {download_photos_url}"
+        )
+    )
     return JsonResponse(
         {
-            "collage_url": absolute_collage_url,
+            "property_page_url": property_page_url,
+            "download_photos_url": download_photos_url,
             "whatsapp_share_url": f"https://wa.me/?text={whatsapp_text}",
         }
     )
 
-# Create your views here.
+
+@require_http_methods(["GET"])
+@csrf_exempt
+def property_photo_download_api(request, property_id):
+    property_obj = get_object_or_404(Property.objects.prefetch_related("photos"), pk=property_id)
+    photos = list(property_obj.photos.all())
+    if not photos:
+        return JsonResponse({"error": "No property photos available for download."}, status=400)
+
+    zip_buffer = BytesIO()
+    written_count = 0
+    with zipfile.ZipFile(zip_buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for index, photo in enumerate(photos, start=1):
+            file_ext = photo.image.name.rsplit(".", 1)[-1].lower() if "." in photo.image.name else "jpg"
+            file_name = f"photo-{index}.{file_ext}"
+            folder_name = slugify(property_obj.title) or f"property-{property_obj.id}"
+            archive_path = f"{folder_name}/{file_name}"
+            try:
+                with photo.image.open("rb") as image_file:
+                    archive.writestr(archive_path, image_file.read())
+                    written_count += 1
+            except OSError:
+                continue
+
+    if written_count == 0:
+        return JsonResponse({"error": "Unable to read property photos for download."}, status=400)
+
+    zip_buffer.seek(0)
+    download_name = f"{slugify(property_obj.title) or f'property-{property_obj.id}'}-photos.zip"
+    response = HttpResponse(zip_buffer.read(), content_type="application/zip")
+    response["Content-Disposition"] = f'attachment; filename="{download_name}"'
+    return response

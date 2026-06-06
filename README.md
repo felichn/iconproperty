@@ -7,14 +7,15 @@ This project provides a property inventory management system for real estate wor
 - Price, width, length, floors, area, and owner WhatsApp number
 - Multi-photo upload per property
 - Sort/filter with paginated listing (**10 properties per page**)
-- Photo collage generation to share via WhatsApp
+- Shareable property page with all photos
+- Downloadable ZIP file containing property photos
 
 ## Stack
 
 - Django backend + templating
 - React frontend (served in-browser via CDN)
 - SQLite database
-- Pillow for image processing (collage generation)
+- Pillow (used in image-related tests)
 
 ## Setup
 
@@ -52,9 +53,10 @@ This project provides a property inventory management system for real estate wor
   - Upload one or many photos (`photo` or `photos` files)
 - `DELETE /api/photos/<photo_id>/`
   - Delete a photo
-- `POST /api/properties/<property_id>/collage/`
-  - Generate collage from all or selected photos (`photo_ids`)
-  - Returns direct collage URL + WhatsApp share URL
+- `GET /api/properties/<property_id>/share-links/`
+  - Returns `property_page_url`, `download_photos_url`, and `whatsapp_share_url`
+- `GET /api/properties/<property_id>/download-photos/`
+  - Downloads all property photos as a ZIP file
 
 ## Common list query parameters
 

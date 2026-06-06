@@ -36,8 +36,6 @@ function InventoryApp() {
   const [statusMessage, setStatusMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [uploadFiles, setUploadFiles] = useState({});
-  const [selectedPhotoIds, setSelectedPhotoIds] = useState({});
-  const [collageLinks, setCollageLinks] = useState({});
 
   const propertyTypeOptions = [
     { value: "rumah", label: "Rumah" },
@@ -158,40 +156,6 @@ function InventoryApp() {
     }
   }
 
-  function togglePhotoSelection(propertyId, photoId) {
-    const currentIds = selectedPhotoIds[propertyId] || [];
-    const exists = currentIds.includes(photoId);
-    const nextIds = exists
-      ? currentIds.filter((id) => id !== photoId)
-      : [...currentIds, photoId];
-    setSelectedPhotoIds((prev) => ({ ...prev, [propertyId]: nextIds }));
-  }
-
-  async function createCollage(propertyId) {
-    const photoIds = selectedPhotoIds[propertyId] || [];
-    try {
-      const response = await fetch(`/api/properties/${propertyId}/collage/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ photo_ids: photoIds }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create collage.");
-      }
-      setCollageLinks((prev) => ({
-        ...prev,
-        [propertyId]: {
-          collageUrl: data.collage_url,
-          whatsappUrl: data.whatsapp_share_url,
-        },
-      }));
-      setStatusMessage("Collage created for WhatsApp sharing.");
-    } catch (error) {
-      setErrorMessage(error.message);
-    }
-  }
-
   function getTimeGreetingLabel() {
     const hour = new Date().getHours();
     if (hour < 11) {
@@ -222,6 +186,15 @@ function InventoryApp() {
       `Selamat ${greetingLabel}, saya Felicia dari Icon Property.\n${propertyType} di ${area} ${listingModeText} nett di harga berapa?`
     );
     return `https://wa.me/${phoneNumber}?text=${text}`;
+  }
+
+  function buildClientWhatsappShareLink(property) {
+    const propertyPageUrl = property.property_page_url || `/properties/${property.id}/`;
+    const downloadUrl = property.download_photos_url || `/api/properties/${property.id}/download-photos/`;
+    const text = encodeURIComponent(
+      `Berikut halaman foto properti ${property.title}: ${propertyPageUrl}\nDownload semua foto: ${downloadUrl}`
+    );
+    return `https://wa.me/?text=${text}`;
   }
 
   return (
@@ -355,10 +328,21 @@ function InventoryApp() {
                 Area: {property.area}<br />
                 Owner WA: {property.owner_whatsapp_number}
               </p>
+              <div className="actions-inline" style={{ marginBottom: "10px" }}>
+                <a href={property.property_page_url} target="_blank" rel="noreferrer">
+                  <button type="button" className="light">Open Property Page</button>
+                </a>
+                <a href={property.download_photos_url} target="_blank" rel="noreferrer">
+                  <button type="button" className="secondary">Download Photos (.zip)</button>
+                </a>
+              </div>
               {ownerWhatsappLink ? (
                 <div className="actions-inline">
                   <a href={ownerWhatsappLink} target="_blank" rel="noreferrer">
                     <button type="button">Contact Owner via WhatsApp</button>
+                  </a>
+                  <a href={buildClientWhatsappShareLink(property)} target="_blank" rel="noreferrer">
+                    <button type="button" className="light">Share Property Page to Client</button>
                   </a>
                 </div>
               ) : (
@@ -368,14 +352,6 @@ function InventoryApp() {
                 {property.photos.map((photo) => (
                   <div className="photo-item" key={photo.id}>
                     <img src={photo.image_url} alt={`Property ${property.id} photo ${photo.id}`} />
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={(selectedPhotoIds[property.id] || []).includes(photo.id)}
-                        onChange={() => togglePhotoSelection(property.id, photo.id)}
-                      />
-                      Use in collage
-                    </label>
                     <button className="danger" type="button" onClick={() => deletePhoto(photo.id)}>
                       Delete
                     </button>
@@ -401,20 +377,7 @@ function InventoryApp() {
                   <button type="button" onClick={() => uploadPropertyPhotos(property.id)}>
                     Upload
                   </button>
-                  <button className="secondary" type="button" onClick={() => createCollage(property.id)}>
-                    Create WhatsApp Collage
-                  </button>
                 </div>
-                {collageLinks[property.id] && (
-                  <div className="actions-inline">
-                    <a href={collageLinks[property.id].collageUrl} target="_blank" rel="noreferrer">
-                      <button type="button" className="light">Open Collage</button>
-                    </a>
-                    <a href={collageLinks[property.id].whatsappUrl} target="_blank" rel="noreferrer">
-                      <button type="button">Send via WhatsApp</button>
-                    </a>
-                  </div>
-                )}
               </div>
             </article>
             );

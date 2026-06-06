@@ -63,21 +63,40 @@ class PropertyApiTests(TestCase):
         self.assertEqual(payload["pagination"]["total_items"], 1)
         self.assertEqual(payload["results"][0]["listing_mode"], "rent")
 
-    def test_collage_creation_returns_whatsapp_url(self):
+    def test_property_share_links_returns_page_and_download_urls(self):
+        listing = Property.objects.first()
+        PropertyPhoto.objects.create(property=listing, image=self._build_test_image())
+
+        response = self.client.get(
+            f"/api/properties/{listing.id}/share-links/",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn("property_page_url", payload)
+        self.assertIn("download_photos_url", payload)
+        self.assertIn("whatsapp_share_url", payload)
+        self.assertIn("https://wa.me/?text=", payload["whatsapp_share_url"])
+
+    def test_photo_download_returns_zip_attachment(self):
         listing = Property.objects.first()
         PropertyPhoto.objects.create(property=listing, image=self._build_test_image())
         PropertyPhoto.objects.create(
             property=listing, image=self._build_test_image(color=(50, 150, 220))
         )
 
-        response = self.client.post(
-            f"/api/properties/{listing.id}/collage/",
-            data='{"photo_ids": []}',
-            content_type="application/json",
-        )
+        response = self.client.get(f"/api/properties/{listing.id}/download-photos/")
 
         self.assertEqual(response.status_code, 200)
-        payload = response.json()
-        self.assertIn("collage_url", payload)
-        self.assertIn("whatsapp_share_url", payload)
-        self.assertIn("https://wa.me/?text=", payload["whatsapp_share_url"])
+        self.assertEqual(response["Content-Type"], "application/zip")
+        self.assertIn("attachment;", response["Content-Disposition"])
+
+    def test_property_public_page_shows_photo_gallery(self):
+        listing = Property.objects.first()
+        PropertyPhoto.objects.create(property=listing, image=self._build_test_image())
+
+        response = self.client.get(f"/properties/{listing.id}/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, listing.title)
+        self.assertContains(response, "Download All Photos")
