@@ -1,7 +1,7 @@
 const { useEffect, useState } = React;
 
 const defaultForm = {
-  title: "",
+  title: "Villa Pasir Putih",
   property_type: "rumah",
   listing_mode: "sell",
   price: "",
@@ -203,10 +203,6 @@ function InventoryApp() {
         <h2>Add Property</h2>
         <form onSubmit={createProperty} className="grid columns-4">
           <div>
-            <label>Title</label>
-            <input value={formData.title} onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))} required />
-          </div>
-          <div>
             <label>Type</label>
             <select value={formData.property_type} onChange={(e) => setFormData((prev) => ({ ...prev, property_type: e.target.value }))}>
               {propertyTypeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
@@ -214,9 +210,21 @@ function InventoryApp() {
           </div>
           <div>
             <label>Rent or Sell</label>
-            <select value={formData.listing_mode} onChange={(e) => setFormData((prev) => ({ ...prev, listing_mode: e.target.value }))}>
-              {listingModeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-            </select>
+            <div className="actions-inline">
+              {listingModeOptions.map((option) => (
+                <label key={option.value} style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: 0 }}>
+                  <input
+                    type="radio"
+                    name="listing_mode"
+                    value={option.value}
+                    checked={formData.listing_mode === option.value}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, listing_mode: e.target.value }))}
+                    style={{ width: "auto" }}
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
           </div>
           <div>
             <label>Price</label>

@@ -1,3 +1,4 @@
+import json
 import tempfile
 from io import BytesIO
 
@@ -62,6 +63,29 @@ class PropertyApiTests(TestCase):
         payload = response.json()
         self.assertEqual(payload["pagination"]["total_items"], 1)
         self.assertEqual(payload["results"][0]["listing_mode"], "rent")
+
+    def test_create_property_defaults_title_when_not_provided(self):
+        response = self.client.post(
+            "/api/properties/",
+            data=json.dumps(
+                {
+                    "property_type": "gudang",
+                    "listing_mode": "sell",
+                    "price": "3500000000",
+                    "width": "15",
+                    "length": "25",
+                    "floors": 2,
+                    "area": "Pasir Putih",
+                    "owner_whatsapp_number": "6281230000000",
+                    "description": "Auto-title listing",
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        payload = response.json()
+        self.assertEqual(payload["title"], "Villa Pasir Putih")
 
     def test_property_share_links_returns_page_and_download_urls(self):
         listing = Property.objects.first()

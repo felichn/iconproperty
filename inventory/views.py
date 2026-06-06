@@ -112,7 +112,6 @@ def _apply_property_payload(property_obj, payload):
         raise ValueError("listing_mode must be one of: rent, sell.")
 
     required_fields = (
-        "title",
         "property_type",
         "listing_mode",
         "price",
@@ -126,7 +125,15 @@ def _apply_property_payload(property_obj, payload):
         if field not in payload:
             raise ValueError(f"{field} is required.")
 
-    property_obj.title = str(payload["title"]).strip()
+    requested_title = payload.get("title")
+    if requested_title is None:
+        if not property_obj.pk:
+            property_obj.title = "Villa Pasir Putih"
+    else:
+        property_obj.title = str(requested_title).strip()
+        if not property_obj.title:
+            property_obj.title = "Villa Pasir Putih"
+
     property_obj.property_type = payload["property_type"]
     property_obj.listing_mode = payload["listing_mode"]
     property_obj.price = _validate_decimal(payload["price"], "price")
@@ -138,7 +145,7 @@ def _apply_property_payload(property_obj, payload):
     property_obj.description = str(payload.get("description", "")).strip()
 
     if not property_obj.title:
-        raise ValueError("title is required.")
+        property_obj.title = "Villa Pasir Putih"
     if not property_obj.area:
         raise ValueError("area is required.")
     if not property_obj.owner_whatsapp_number:
