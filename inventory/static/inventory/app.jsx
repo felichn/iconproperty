@@ -192,6 +192,17 @@ function InventoryApp() {
     }
   }
 
+  function buildOwnerWhatsappLink(property) {
+    const phoneNumber = (property.owner_whatsapp_number || "").replace(/\D/g, "");
+    if (!phoneNumber) {
+      return null;
+    }
+    const text = encodeURIComponent(
+      `Halo, saya tertarik dengan properti "${property.title}". Apakah masih tersedia?`
+    );
+    return `https://wa.me/${phoneNumber}?text=${text}`;
+  }
+
   return (
     <div>
       <section className="panel">
@@ -321,6 +332,15 @@ function InventoryApp() {
                 Area: {property.area}<br />
                 Owner WA: {property.owner_whatsapp_number}
               </p>
+              {buildOwnerWhatsappLink(property) ? (
+                <div className="actions-inline">
+                  <a href={buildOwnerWhatsappLink(property)} target="_blank" rel="noreferrer">
+                    <button type="button">Contact Owner via WhatsApp</button>
+                  </a>
+                </div>
+              ) : (
+                <p className="muted">Owner WhatsApp number is not valid.</p>
+              )}
               <div className="photo-row">
                 {property.photos.map((photo) => (
                   <div className="photo-item" key={photo.id}>
