@@ -323,8 +323,8 @@ function InventoryApp() {
                 <span>{property.property_type_label}</span>
               </div>
               <p className="property-meta">
-                {property.listing_mode_label} | Price: {property.price}<br />
-                Property Dimension: {property.width} x {property.length} | Floors: {property.floors}<br />
+                {property.listing_mode_label} | Price: Rp {property.price}<br />
+                Size: {property.width} x {property.length} | Floors: {property.floors}<br />
                 Area: {property.area}<br />
                 Owner WA: {property.owner_whatsapp_number}
               </p>
