@@ -1,0 +1,110 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Contact Us</title>
+    <link rel="stylesheet" href="{% static 'pages/styles.css' %}">
+</head>
+<body>
+    <header class="site-header" aria-label="Primary">
+        <a class="brand" href="{% url 'pages:home' %}" aria-label="Home">GEC</a>
+        <nav class="nav-links" aria-label="Support navigation">
+            <a href="#quick-actions">Quick Actions</a>
+            <a href="#contact-options">Contact</a>
+            <a href="#stay-in-touch">Updates</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" aria-labelledby="page-title">
+            <p class="kicker">Contact Us</p>
+            <h1 id="page-title">Welcome. We're here to help.</h1>
+            <p class="hero-copy">
+                Choose a topic, connect with an expert, or send us a note. Every support path is designed
+                to be clear, direct, and easy to act on.
+            </p>
+        </section>
+
+        <section class="notice" aria-label="Inclusive communication">
+            <p>Learn how we make support more accessible through inclusive communication with our community.</p>
+            <a href="#contact-options">Explore support options</a>
+        </section>
+
+        <section class="section-grid" id="quick-actions" aria-labelledby="quick-actions-title">
+            <div class="section-intro">
+                <p class="kicker">Quick Actions</p>
+                <h2 id="quick-actions-title">Get help with frequent questions.</h2>
+                <p>Open a topic below to find the fastest next step.</p>
+            </div>
+
+            <div class="accordion-list">
+                {% for action in quick_actions %}
+                    <details class="accordion-item"{% if forloop.first %} open{% endif %}>
+                        <summary>
+                            <span>{{ action.title }}</span>
+                            <span aria-hidden="true">+</span>
+                        </summary>
+                        <ul>
+                            {% for question in action.questions %}
+                                <li>{{ question }}</li>
+                            {% endfor %}
+                        </ul>
+                    </details>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="support-info" aria-label="Support centre information">
+            <p class="kicker">Support Centre Information</p>
+            <div>
+                <h2>Our Guest Education Centre is ready when you are.</h2>
+                <p>
+                    Reach us by live chat, phone, or email. Phone support is available weekdays 6am-6pm PT
+                    and weekends 6am-4pm PT.
+                </p>
+            </div>
+            <a class="phone-link" href="tel:18772639300">1.877.263.9300</a>
+        </section>
+
+        <section class="contact-grid" id="contact-options" aria-labelledby="contact-options-title">
+            <div class="section-heading">
+                <p class="kicker">Connect</p>
+                <h2 id="contact-options-title">Choose the support lane that fits.</h2>
+            </div>
+
+            <div class="cards">
+                {% for option in contact_options %}
+                    <article class="contact-card">
+                        <p class="card-eyebrow">{{ option.eyebrow }}</p>
+                        <h3>{{ option.title }}</h3>
+                        <p>{{ option.description }}</p>
+                        <a href="#stay-in-touch">{{ option.cta }}</a>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="app-callout" aria-label="Mobile app">
+            <div>
+                <p class="kicker">Get what you love, faster.</p>
+                <h2>Download the app for support on the go.</h2>
+            </div>
+            <a class="button" href="#stay-in-touch">Get the app</a>
+        </section>
+
+        <section class="newsletter" id="stay-in-touch" aria-labelledby="newsletter-title">
+            <p class="kicker">Let's stay in touch.</p>
+            <h2 id="newsletter-title">Be first to know about product drops, community events, and support updates.</h2>
+            <form>
+                <label for="email">Email address</label>
+                <div class="email-row">
+                    <input id="email" name="email" type="email" placeholder="you@example.com">
+                    <button type="submit">Sign up</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
