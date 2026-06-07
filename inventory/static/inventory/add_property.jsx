@@ -92,24 +92,6 @@ function AddPropertyApp() {
           </select>
         </div>
         <div>
-          <label>Rent or Sell</label>
-          <div className="actions-inline">
-            {listingModeOptions.map((option) => (
-              <label key={option.value} style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: 0 }}>
-                <input
-                  type="radio"
-                  name="listing_mode"
-                  value={option.value}
-                  checked={formData.listing_mode === option.value}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, listing_mode: e.target.value }))}
-                  style={{ width: "auto" }}
-                />
-                {option.label}
-              </label>
-            ))}
-          </div>
-        </div>
-        <div>
           <label>Area</label>
           <select
             value={formData.area}
@@ -194,6 +176,24 @@ function AddPropertyApp() {
             value={formData.description}
             onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
           />
+        </div>
+        <div style={{ gridColumn: "1 / -1" }}>
+          <label>Rent or Sell</label>
+          <div className="actions-inline">
+            {listingModeOptions.map((option) => (
+              <label key={option.value} style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: 0 }}>
+                <input
+                  type="radio"
+                  name="listing_mode"
+                  value={option.value}
+                  checked={formData.listing_mode === option.value}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, listing_mode: e.target.value }))}
+                  style={{ width: "auto" }}
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
         </div>
         <div className="actions-inline">
           <button type="submit" disabled={saving}>
