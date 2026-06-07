@@ -3,7 +3,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("", views.inventory_page, name="inventory-page"),
+    path("", views.inventory_list_page, name="inventory-page"),
+    path("properties/add/", views.property_add_page, name="property-add-page"),
     path(
         "properties/<int:property_id>/",
         views.property_public_page,

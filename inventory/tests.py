@@ -196,3 +196,8 @@ class PropertyApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, listing.unit)
         self.assertContains(response, "Download All Photos")
+
+    def test_add_property_page_route_is_available(self):
+        response = self.client.get("/properties/add/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Add Property")

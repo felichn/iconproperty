@@ -40,7 +40,8 @@ This project provides a property inventory management system for real estate wor
 
 4. Open:
 
-   - Main app: `http://127.0.0.1:8000/`
+   - Property display page: `http://127.0.0.1:8000/`
+   - Add property page: `http://127.0.0.1:8000/properties/add/`
    - Admin: `http://127.0.0.1:8000/admin/`
 
 ## API Endpoints

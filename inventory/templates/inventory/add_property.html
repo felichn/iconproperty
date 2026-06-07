@@ -4,29 +4,26 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Property Inventory Manager</title>
+    <title>Add Property</title>
     <link rel="stylesheet" href="{% static 'inventory/styles.css' %}" />
 </head>
 <body>
     <header class="page-header">
-        <h1>Property Inventory Manager</h1>
-        <p>Display property inventory, upload photos, and share listing pages.</p>
+        <h1>Add Property</h1>
+        <p>Create a new property record with blok/no and pricing details.</p>
         <div class="actions-inline" style="max-width: 420px; margin-top: 10px;">
-            <a href="{% url 'property-add-page' %}">
-                <button type="button">Add Property</button>
-            </a>
-            <a href="#inventory-root">
-                <button type="button" class="light">Upload Photos</button>
+            <a href="{% url 'inventory-page' %}">
+                <button type="button" class="light">Back to Property Inventory</button>
             </a>
         </div>
     </header>
     <main>
-        <div id="inventory-root"></div>
+        <div id="add-property-root"></div>
     </main>
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script type="text/babel" src="{% static 'inventory/app.jsx' %}"></script>
+    <script type="text/babel" src="{% static 'inventory/add_property.jsx' %}"></script>
 </body>
 </html>

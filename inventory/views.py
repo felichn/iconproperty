@@ -16,8 +16,12 @@ from django.views.decorators.http import require_http_methods
 from .models import Property, PropertyPhoto
 
 
-def inventory_page(request):
+def inventory_list_page(request):
     return render(request, "inventory/index.html")
+
+
+def property_add_page(request):
+    return render(request, "inventory/add_property.html")
 
 
 def property_public_page(request, property_id):
