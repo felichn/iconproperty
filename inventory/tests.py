@@ -200,4 +200,4 @@ class PropertyApiTests(TestCase):
     def test_add_property_page_route_is_available(self):
         response = self.client.get("/properties/add/")
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Add Property")
+        self.assertContains(response, "Isi data properti baru")
