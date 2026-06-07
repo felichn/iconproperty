@@ -234,10 +234,10 @@ function AddPropertyApp() {
           </div>
 
           <div className="d-flex flex-wrap gap-2 mt-4">
-            <button type="submit" className="btn btn-dark" disabled={saving}>
+            <button type="submit" className="btn btn-primary" disabled={saving}>
               {saving ? "Saving..." : "Save Property"}
             </button>
-            <button type="button" className="btn btn-outline-dark" onClick={() => window.location.assign("/")}>
+            <button type="button" className="btn btn-outline-secondary" onClick={() => window.location.assign("/")}>
               Go to Property Inventory
             </button>
           </div>
