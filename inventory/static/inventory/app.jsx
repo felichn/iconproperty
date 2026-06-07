@@ -1,7 +1,6 @@
 const { useEffect, useState } = React;
 
 const defaultForm = {
-  title: "Villa Pasir Putih",
   property_type: "rumah",
   listing_mode: "sell",
   price: "",
