@@ -6,7 +6,6 @@ This project provides a property inventory management system for real estate wor
 - Listing mode (**Rent** or **Sell**)
 - Unique unit identity from **Blok** + **No.** (displayed as **Unit** code)
 - Price, width, length, floors, area, and owner WhatsApp number
-- Multi-photo upload per property
 - Sort/filter with paginated listing (**10 properties per page**)
 - Shareable property page with all photos
 - Downloadable ZIP file containing property photos
@@ -51,8 +50,6 @@ This project provides a property inventory management system for real estate wor
   - Create a property
 - `GET/PUT /api/properties/<property_id>/`
   - Retrieve or update one property
-- `POST /api/properties/<property_id>/photos/`
-  - Upload one or many photos (`photo` or `photos` files)
 - `DELETE /api/photos/<photo_id>/`
   - Delete a photo
 - `GET /api/properties/<property_id>/share-links/`

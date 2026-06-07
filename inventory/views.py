@@ -278,26 +278,6 @@ def property_item_api(request, property_id):
     return JsonResponse(_serialize_property(property_obj, request))
 
 
-@require_http_methods(["POST"])
-@csrf_exempt
-def property_photo_upload_api(request, property_id):
-    property_obj = get_object_or_404(Property, pk=property_id)
-    files = request.FILES.getlist("photos")
-    if not files:
-        single_photo = request.FILES.get("photo")
-        if single_photo:
-            files = [single_photo]
-    if not files:
-        return JsonResponse({"error": "No photos uploaded."}, status=400)
-
-    saved_photos = []
-    for file_obj in files:
-        photo = PropertyPhoto.objects.create(property=property_obj, image=file_obj)
-        saved_photos.append(_serialize_photo(photo, request))
-
-    return JsonResponse({"photos": saved_photos}, status=201)
-
-
 @require_http_methods(["DELETE"])
 @csrf_exempt
 def property_photo_delete_api(request, photo_id):

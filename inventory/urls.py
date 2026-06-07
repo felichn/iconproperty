@@ -17,11 +17,6 @@ urlpatterns = [
         name="property-item-api",
     ),
     path(
-        "api/properties/<int:property_id>/photos/",
-        views.property_photo_upload_api,
-        name="property-photo-upload-api",
-    ),
-    path(
         "api/properties/<int:property_id>/share-links/",
         views.property_share_links_api,
         name="property-share-links-api",

@@ -28,7 +28,6 @@ function InventoryApp() {
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [uploadFiles, setUploadFiles] = useState({});
 
   const propertyTypeOptions = [
     { value: "rumah", label: "Rumah" },
@@ -85,31 +84,6 @@ function InventoryApp() {
     fetchProperties(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.property_type, filters.listing_mode, filters.area, filters.min_price, filters.max_price, filters.sort]);
-
-  async function uploadPropertyPhotos(propertyId) {
-    const files = uploadFiles[propertyId];
-    if (!files || files.length === 0) {
-      setErrorMessage("Select one or more photos first.");
-      return;
-    }
-    const payload = new FormData();
-    files.forEach((file) => payload.append("photos", file));
-    try {
-      const response = await fetch(`/api/properties/${propertyId}/photos/`, {
-        method: "POST",
-        body: payload,
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to upload photos.");
-      }
-      setStatusMessage(`${data.photos.length} photo(s) uploaded.`);
-      setUploadFiles((prev) => ({ ...prev, [propertyId]: [] }));
-      fetchProperties(page);
-    } catch (error) {
-      setErrorMessage(error.message);
-    }
-  }
 
   async function deletePhoto(photoId) {
     try {
@@ -296,27 +270,6 @@ function InventoryApp() {
                     </button>
                   </div>
                 ))}
-              </div>
-              <div className="grid" style={{ marginTop: "12px" }}>
-                <div>
-                  <label>Upload Photos</label>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={(e) => {
-                      setUploadFiles((prev) => ({
-                        ...prev,
-                        [property.id]: Array.from(e.target.files || []),
-                      }));
-                    }}
-                  />
-                </div>
-                <div className="actions-inline">
-                  <button type="button" onClick={() => uploadPropertyPhotos(property.id)}>
-                    Upload Photos
-                  </button>
-                </div>
               </div>
             </article>
             );
