@@ -15,8 +15,8 @@ const defaultForm = {
 function InventoryApp() {
   const areaOptionsByPropertyType = {
     rumah: ["Villa Pasir Putih"],
-    gudang: ["Gudang Bizpark"],
-    ruko: ["Hollywood", "Broadway", "Manhattan"],
+    gudang: ["Bizpark"],
+    ruko: ["Hollywood", "Manhattan", "Broadway"],
   };
 
   const [formData, setFormData] = useState(defaultForm);
