@@ -18,6 +18,7 @@ function InventoryApp() {
     gudang: ["Bizpark"],
     ruko: ["Hollywood", "Manhattan", "Broadway"],
   };
+  const allAreaOptions = Array.from(new Set(Object.values(areaOptionsByPropertyType).flat()));
 
   const [formData, setFormData] = useState(defaultForm);
   const [filters, setFilters] = useState({
@@ -202,6 +203,13 @@ function InventoryApp() {
     return `https://wa.me/?text=${text}`;
   }
 
+  function getFilterAreaOptions() {
+    if (filters.property_type && areaOptionsByPropertyType[filters.property_type]) {
+      return areaOptionsByPropertyType[filters.property_type];
+    }
+    return allAreaOptions;
+  }
+
   return (
     <div>
       <section className="panel">
@@ -291,7 +299,14 @@ function InventoryApp() {
         <div className="grid columns-4">
           <div>
             <label>Type</label>
-            <select value={filters.property_type} onChange={(e) => setFilters((prev) => ({ ...prev, property_type: e.target.value }))}>
+            <select
+              value={filters.property_type}
+              onChange={(e) => setFilters((prev) => ({
+                ...prev,
+                property_type: e.target.value,
+                area: "",
+              }))}
+            >
               <option value="">All</option>
               {propertyTypeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
@@ -304,8 +319,15 @@ function InventoryApp() {
             </select>
           </div>
           <div>
-            <label>Area contains</label>
-            <input value={filters.area} onChange={(e) => setFilters((prev) => ({ ...prev, area: e.target.value }))} />
+            <label>Area</label>
+            <select value={filters.area} onChange={(e) => setFilters((prev) => ({ ...prev, area: e.target.value }))}>
+              <option value="">All</option>
+              {getFilterAreaOptions().map((areaOption) => (
+                <option key={areaOption} value={areaOption}>
+                  {areaOption}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label>Sort</label>
