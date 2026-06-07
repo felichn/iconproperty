@@ -9,11 +9,10 @@ class HomePageTests(SimpleTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "pages/home.html")
 
-    def test_homepage_renders_property_sections(self):
+    def test_homepage_renders_simple_hello_page(self):
         response = self.client.get("/")
 
-        self.assertContains(response, "Find the space that moves you forward.")
-        self.assertContains(response, "Property paths")
-        self.assertContains(response, "Sharper property discovery")
-        self.assertContains(response, "Market notes")
+        self.assertContains(response, "Hello.")
+        self.assertContains(response, "Welcome to a cleaner property workspace.")
+        self.assertContains(response, "/properties/add/")
         self.assertContains(response, 'href="/static/pages/styles.css"')

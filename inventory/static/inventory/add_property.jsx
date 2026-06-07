@@ -68,6 +68,7 @@ function AddPropertyApp() {
 
   return (
     <section className="panel">
+      <p className="eyebrow">Listing details</p>
       <h2>Property Information</h2>
       <form onSubmit={createProperty} className="grid columns-4">
         <div>
@@ -199,8 +200,8 @@ function AddPropertyApp() {
           <button type="submit" disabled={saving}>
             {saving ? "Saving..." : "Save Property"}
           </button>
-          <button type="button" className="light" onClick={() => window.location.assign("/")}>
-            Go to Property Inventory
+          <button type="button" className="light" onClick={() => window.location.assign("/inventory/")}>
+            Go to Inventory
           </button>
         </div>
       </form>

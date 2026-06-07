@@ -11,99 +11,19 @@
     <header class="site-header" aria-label="Primary">
         <a class="brand" href="{% url 'pages:home' %}" aria-label="Icon Property home">IP</a>
         <nav class="nav-links" aria-label="Primary navigation">
-            <a href="#property-paths">Properties</a>
-            <a href="#featured-tools">Services</a>
-            <a href="#market-notes">Insights</a>
+            <a href="/inventory/">Inventory</a>
+            <a href="/properties/add/">Add Property</a>
         </nav>
     </header>
 
-    <main>
-        <section class="hero" aria-labelledby="page-title">
+    <main class="hello-page">
+        <section class="hello-card" aria-labelledby="page-title">
             <p class="kicker">Icon Property</p>
-            <h1 id="page-title">Find the space that moves you forward.</h1>
+            <h1 id="page-title">Hello.</h1>
             <p class="hero-copy">
-                A refined property experience for discovering homes, comparing opportunities,
-                and making confident next moves.
+                Welcome to a cleaner property workspace.
             </p>
-        </section>
-
-        <section class="notice" aria-label="Featured property experience">
-            <p>Search, compare, and shortlist properties through a clean editorial layout built for decisive browsing.</p>
-            <a href="#featured-tools">Explore the experience</a>
-        </section>
-
-        <section class="section-grid" id="property-paths" aria-labelledby="property-paths-title">
-            <div class="section-intro">
-                <p class="kicker">Property paths</p>
-                <h2 id="property-paths-title">Start with the move that matters.</h2>
-                <p>Open a path to see how the experience can organize your next property decision.</p>
-            </div>
-
-            <div class="accordion-list">
-                {% for path in property_paths %}
-                    <details class="accordion-item"{% if forloop.first %} open{% endif %}>
-                        <summary>
-                            <span>{{ path.title }}</span>
-                            <span aria-hidden="true">+</span>
-                        </summary>
-                        <ul>
-                            {% for item in path.items %}
-                                <li>{{ item }}</li>
-                            {% endfor %}
-                        </ul>
-                    </details>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section class="support-info" aria-label="Property market positioning">
-            <p class="kicker">Market clarity</p>
-            <div>
-                <h2>Local insight with a clear point of view.</h2>
-                <p>
-                    From first search to final shortlist, the interface keeps property details,
-                    neighborhood signals, and decision points easy to scan.
-                </p>
-            </div>
-            <a class="phone-link" href="#property-paths">View paths</a>
-        </section>
-
-        <section class="contact-grid" id="featured-tools" aria-labelledby="featured-tools-title">
-            <div class="section-heading">
-                <p class="kicker">Featured tools</p>
-                <h2 id="featured-tools-title">Designed for fast, confident comparison.</h2>
-            </div>
-
-            <div class="cards">
-                {% for card in feature_cards %}
-                    <article class="contact-card">
-                        <p class="card-eyebrow">{{ card.eyebrow }}</p>
-                        <h3>{{ card.title }}</h3>
-                        <p>{{ card.description }}</p>
-                        <a href="#market-notes">{{ card.cta }}</a>
-                    </article>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section class="app-callout" aria-label="Saved property shortlist">
-            <div>
-                <p class="kicker">Your shortlist, refined.</p>
-                <h2>Save properties, compare details, and keep momentum.</h2>
-            </div>
-            <a class="button" href="#market-notes">Create shortlist</a>
-        </section>
-
-        <section class="newsletter" id="market-notes" aria-labelledby="newsletter-title">
-            <p class="kicker">Market notes</p>
-            <h2 id="newsletter-title">Get select property updates and neighborhood signals in your inbox.</h2>
-            <form>
-                <label for="email">Email address</label>
-                <div class="email-row">
-                    <input id="email" name="email" type="email" placeholder="you@example.com">
-                    <button type="submit">Subscribe</button>
-                </div>
-            </form>
+            <a class="button" href="/properties/add/">Add a property</a>
         </section>
     </main>
 </body>
