@@ -3,6 +3,8 @@ const { useEffect, useState } = React;
 const defaultForm = {
   property_type: "rumah",
   listing_mode: "sell",
+  block: "",
+  unit_no: "",
   price: "",
   width: "",
   length: "",
@@ -114,7 +116,7 @@ function InventoryApp() {
         throw new Error(data.error || "Failed to create property.");
       }
       setFormData(defaultForm);
-      setStatusMessage(`Property "${data.title}" created.`);
+      setStatusMessage(`Unit "${data.unit}" created.`);
       fetchProperties(1);
     } catch (error) {
       setErrorMessage(error.message);
@@ -198,7 +200,7 @@ function InventoryApp() {
     const propertyPageUrl = property.property_page_url || `/properties/${property.id}/`;
     const downloadUrl = property.download_photos_url || `/api/properties/${property.id}/download-photos/`;
     const text = encodeURIComponent(
-      `Berikut halaman foto properti ${property.title}: ${propertyPageUrl}\nDownload semua foto: ${downloadUrl}`
+      `Berikut halaman foto properti Unit ${property.unit}: ${propertyPageUrl}\nDownload semua foto: ${downloadUrl}`
     );
     return `https://wa.me/?text=${text}`;
   }
@@ -253,6 +255,14 @@ function InventoryApp() {
           <div>
             <label>Price</label>
             <input type="number" step="0.01" value={formData.price} onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))} required />
+          </div>
+          <div>
+            <label>Blok</label>
+            <input value={formData.block} onChange={(e) => setFormData((prev) => ({ ...prev, block: e.target.value }))} required />
+          </div>
+          <div>
+            <label>No.</label>
+            <input value={formData.unit_no} onChange={(e) => setFormData((prev) => ({ ...prev, unit_no: e.target.value }))} required />
           </div>
           <div>
             <label>Width</label>
@@ -375,13 +385,13 @@ function InventoryApp() {
             return (
             <article key={property.id} className="property-card">
               <div className="property-header">
-                <h3>{property.title}</h3>
+                <h3>Unit: {property.unit}</h3>
                 <span>{property.property_type_label}</span>
               </div>
               <p className="property-meta">
                 {property.listing_mode_label} | Price: Rp {property.price}<br />
                 Size: {property.width} x {property.length} | Floors: {property.floors}<br />
-                Area: {property.area}<br />
+                Area: {property.area} | Blok: {property.block} | No.: {property.unit_no}<br />
                 Owner WA: {property.owner_whatsapp_number}
               </p>
               <div className="actions-inline" style={{ marginBottom: "10px" }}>

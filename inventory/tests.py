@@ -28,11 +28,13 @@ class PropertyApiTests(TestCase):
                 title=f"Property {index}",
                 property_type=Property.PropertyType.RUMAH,
                 listing_mode=Property.ListingMode.SELL,
+                block=f"{(index % 3) + 1}",
+                unit_no=index + 1,
                 price=1_000_000 + index,
                 width=10,
                 length=20,
                 floors=2,
-                area="Jakarta",
+                area="Villa Pasir Putih",
                 owner_whatsapp_number="6281234567890",
                 description="Sample listing",
             )
@@ -50,11 +52,13 @@ class PropertyApiTests(TestCase):
             title="Rental Listing",
             property_type=Property.PropertyType.RUKO,
             listing_mode=Property.ListingMode.RENT,
+            block="F",
+            unit_no=1,
             price=2_000_000,
             width=8,
             length=15,
             floors=1,
-            area="Bandung",
+            area="Hollywood",
             owner_whatsapp_number="6281111111111",
             description="Rental unit",
         )
@@ -71,11 +75,13 @@ class PropertyApiTests(TestCase):
                 {
                     "property_type": "gudang",
                     "listing_mode": "sell",
+                    "block": "C2",
+                    "unit_no": 55,
                     "price": "3500000000",
                     "width": "15",
                     "length": "25",
                     "floors": 2,
-                    "area": "Pasir Putih",
+                    "area": "Bizpark",
                     "owner_whatsapp_number": "6281230000000",
                     "description": "Auto-title listing",
                 }
@@ -85,7 +91,73 @@ class PropertyApiTests(TestCase):
 
         self.assertEqual(response.status_code, 201)
         payload = response.json()
-        self.assertEqual(payload["title"], "Villa Pasir Putih")
+        self.assertEqual(payload["title"], "Bizpark")
+        self.assertEqual(payload["unit"], "BPC2-055")
+
+    def test_unit_format_examples(self):
+        Property.objects.all().delete()
+
+        rumah = Property.objects.create(
+            title="Villa Pasir Putih",
+            property_type=Property.PropertyType.RUMAH,
+            listing_mode=Property.ListingMode.SELL,
+            block="1",
+            unit_no=38,
+            price=100,
+            width=10,
+            length=10,
+            floors=1,
+            area="Villa Pasir Putih",
+            owner_whatsapp_number="6281000000001",
+            description="",
+        )
+        rumah_2 = Property.objects.create(
+            title="Villa Pasir Putih",
+            property_type=Property.PropertyType.RUMAH,
+            listing_mode=Property.ListingMode.SELL,
+            block="3",
+            unit_no=3,
+            price=100,
+            width=10,
+            length=10,
+            floors=1,
+            area="Villa Pasir Putih",
+            owner_whatsapp_number="6281000000002",
+            description="",
+        )
+        ruko = Property.objects.create(
+            title="Hollywood",
+            property_type=Property.PropertyType.RUKO,
+            listing_mode=Property.ListingMode.SELL,
+            block="F",
+            unit_no=1,
+            price=100,
+            width=10,
+            length=10,
+            floors=1,
+            area="Hollywood",
+            owner_whatsapp_number="6281000000003",
+            description="",
+        )
+        gudang = Property.objects.create(
+            title="Bizpark",
+            property_type=Property.PropertyType.GUDANG,
+            listing_mode=Property.ListingMode.SELL,
+            block="C2",
+            unit_no=55,
+            price=100,
+            width=10,
+            length=10,
+            floors=1,
+            area="Bizpark",
+            owner_whatsapp_number="6281000000004",
+            description="",
+        )
+
+        self.assertEqual(rumah.unit, "V5S1-038")
+        self.assertEqual(rumah_2.unit, "V5S3-003")
+        self.assertEqual(ruko.unit, "MBHW-F01")
+        self.assertEqual(gudang.unit, "BPC2-055")
 
     def test_property_share_links_returns_page_and_download_urls(self):
         listing = Property.objects.first()
@@ -122,5 +194,5 @@ class PropertyApiTests(TestCase):
         response = self.client.get(f"/properties/{listing.id}/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, listing.title)
+        self.assertContains(response, listing.unit)
         self.assertContains(response, "Download All Photos")

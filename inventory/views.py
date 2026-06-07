@@ -50,15 +50,17 @@ def _validate_decimal(value, field_name):
         raise ValueError(f"{field_name} must be a valid number.")
 
 
-def _validate_int(value, field_name):
+def _validate_int(value, field_name, minimum=0):
     if value in (None, ""):
         raise ValueError(f"{field_name} is required.")
     try:
         parsed = int(value)
     except (TypeError, ValueError):
         raise ValueError(f"{field_name} must be an integer.")
-    if parsed < 0:
-        raise ValueError(f"{field_name} cannot be negative.")
+    if parsed < minimum:
+        if minimum == 0:
+            raise ValueError(f"{field_name} cannot be negative.")
+        raise ValueError(f"{field_name} must be at least {minimum}.")
     return parsed
 
 
@@ -85,6 +87,9 @@ def _serialize_property(property_obj, request):
         "property_type_label": property_obj.get_property_type_display(),
         "listing_mode": property_obj.listing_mode,
         "listing_mode_label": property_obj.get_listing_mode_display(),
+        "block": property_obj.block,
+        "unit_no": property_obj.unit_no,
+        "unit": property_obj.unit,
         "price": str(property_obj.price),
         "width": str(property_obj.width),
         "length": str(property_obj.length),
@@ -119,35 +124,41 @@ def _apply_property_payload(property_obj, payload):
         "length",
         "floors",
         "area",
+        "block",
+        "unit_no",
         "owner_whatsapp_number",
     )
     for field in required_fields:
         if field not in payload:
             raise ValueError(f"{field} is required.")
 
-    requested_title = payload.get("title")
-    if requested_title is None:
-        if not property_obj.pk:
-            property_obj.title = "Villa Pasir Putih"
-    else:
-        property_obj.title = str(requested_title).strip()
-        if not property_obj.title:
-            property_obj.title = "Villa Pasir Putih"
-
     property_obj.property_type = payload["property_type"]
     property_obj.listing_mode = payload["listing_mode"]
     property_obj.price = _validate_decimal(payload["price"], "price")
     property_obj.width = _validate_decimal(payload["width"], "width")
     property_obj.length = _validate_decimal(payload["length"], "length")
-    property_obj.floors = _validate_int(payload["floors"], "floors")
+    property_obj.floors = _validate_int(payload["floors"], "floors", minimum=1)
     property_obj.area = str(payload["area"]).strip()
+    property_obj.block = str(payload["block"]).strip()
+    property_obj.unit_no = _validate_int(payload["unit_no"], "unit_no", minimum=1)
     property_obj.owner_whatsapp_number = str(payload["owner_whatsapp_number"]).strip()
     property_obj.description = str(payload.get("description", "")).strip()
 
-    if not property_obj.title:
-        property_obj.title = "Villa Pasir Putih"
+    requested_title = payload.get("title")
+    if requested_title is None or not str(requested_title).strip():
+        property_obj.title = property_obj.area
+    else:
+        property_obj.title = str(requested_title).strip()
+
     if not property_obj.area:
         raise ValueError("area is required.")
+    allowed_areas = Property.AREA_OPTIONS_BY_PROPERTY_TYPE.get(property_obj.property_type, [])
+    if allowed_areas and property_obj.area not in allowed_areas:
+        raise ValueError(
+            f"area must be one of: {', '.join(allowed_areas)}."
+        )
+    if not property_obj.block:
+        raise ValueError("block is required.")
     if not property_obj.owner_whatsapp_number:
         raise ValueError("owner_whatsapp_number is required.")
 
@@ -304,7 +315,7 @@ def property_share_links_api(request, property_id):
     )
     whatsapp_text = quote_plus(
         (
-            f"Selamat, berikut halaman foto properti {property_obj.title} di {property_obj.area}: "
+            f"Selamat, berikut halaman foto properti Unit {property_obj.unit} di {property_obj.area}: "
             f"{property_page_url}. Download semua foto di: {download_photos_url}"
         )
     )

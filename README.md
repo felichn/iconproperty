@@ -4,6 +4,7 @@ This project provides a property inventory management system for real estate wor
 
 - Property data for **Rumah**, **Ruko**, and **Gudang**
 - Listing mode (**Rent** or **Sell**)
+- Unique unit identity from **Blok** + **No.** (displayed as **Unit** code)
 - Price, width, length, floors, area, and owner WhatsApp number
 - Multi-photo upload per property
 - Sort/filter with paginated listing (**10 properties per page**)
@@ -67,3 +68,13 @@ This project provides a property inventory management system for real estate wor
 - `area` (contains match)
 - `min_price`, `max_price`
 - `min_floors`, `max_floors`
+
+## Unit code format
+
+Each property stores `block` (**Blok**) and `unit_no` (**No.**) and exposes a computed `unit` code.
+
+Examples:
+- `Villa Pasir Putih` Blok `1` No. `38` -> `V5S1-038`
+- `Villa Pasir Putih` Blok `3` No. `3` -> `V5S3-003`
+- `Hollywood` (Ruko) Blok `F` No. `1` -> `MBHW-F01`
+- `Bizpark` (Gudang) Blok `C2` No. `55` -> `BPC2-055`

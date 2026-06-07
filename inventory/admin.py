@@ -11,16 +11,18 @@ class PropertyPhotoInline(admin.TabularInline):
 @admin.register(Property)
 class PropertyAdmin(admin.ModelAdmin):
     list_display = (
-        "title",
+        "unit",
         "property_type",
         "listing_mode",
+        "block",
+        "unit_no",
         "price",
         "area",
         "floors",
         "owner_whatsapp_number",
     )
-    list_filter = ("property_type", "listing_mode", "floors", "area")
-    search_fields = ("title", "area", "owner_whatsapp_number")
+    list_filter = ("property_type", "listing_mode", "floors", "area", "block")
+    search_fields = ("title", "area", "owner_whatsapp_number", "block", "=unit_no")
     inlines = [PropertyPhotoInline]
 
 

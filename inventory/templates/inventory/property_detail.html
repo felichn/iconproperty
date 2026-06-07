@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ property.title }} - Property Photos</title>
+    <title>Unit {{ property.unit }} - Property Photos</title>
     <link rel="stylesheet" href="{% static 'inventory/styles.css' %}" />
 </head>
 <body>
     <header class="page-header">
-        <h1>{{ property.title }}</h1>
+        <h1>Unit {{ property.unit }}</h1>
         <p>
             {{ property.get_property_type_display }} | {{ property.get_listing_mode_display }}
-            | Area: {{ property.area }}
+            | Area: {{ property.area }} | Blok: {{ property.block }} | No.: {{ property.unit_no }}
         </p>
     </header>
     <main>
