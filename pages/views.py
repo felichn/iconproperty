@@ -2,61 +2,61 @@ from django.shortcuts import render
 
 
 def home(request):
-    quick_actions = [
+    property_paths = [
         {
-            "title": "Orders",
-            "questions": [
-                "Track an order from purchase to delivery.",
-                "Update payment or billing details.",
-                "Get help with gift cards and receipts.",
+            "title": "Buy",
+            "items": [
+                "Compare curated homes by neighborhood, price, and lifestyle fit.",
+                "Save listings that match your must-have details.",
+                "Move from shortlist to showing with fewer steps.",
             ],
         },
         {
-            "title": "Returns",
-            "questions": [
-                "Start a return or exchange online.",
-                "Review refund timing and return policy.",
-                "Report an item that arrived damaged.",
+            "title": "Rent",
+            "items": [
+                "Find available spaces with clean filters and clear next steps.",
+                "Review amenities, commute context, and lease highlights.",
+                "Keep favorite properties organized in one place.",
             ],
         },
         {
-            "title": "Services",
-            "questions": [
-                "Book a virtual shopping session.",
-                "Find a nearby store or service location.",
-                "Learn about complimentary alterations.",
+            "title": "Sell",
+            "items": [
+                "Position your property with confident presentation.",
+                "Understand comparable activity in your local market.",
+                "Create a sharper launch plan from first look to listing.",
             ],
         },
         {
-            "title": "Sizing",
-            "questions": [
-                "Use the size guide before ordering.",
-                "Chat with an educator for fit support.",
+            "title": "Invest",
+            "items": [
+                "Scan opportunities with practical performance signals.",
+                "Balance location, yield, and long-term upside.",
             ],
         },
     ]
-    contact_options = [
+    feature_cards = [
         {
-            "eyebrow": "Fast support",
-            "title": "Chat with us",
-            "description": "Our virtual assistant is ready 24/7 and can connect you with a human during support hours.",
-            "cta": "Start live chat",
+            "eyebrow": "Curated search",
+            "title": "Sharper property discovery",
+            "description": "A focused browsing experience that highlights the homes and spaces worth a closer look.",
+            "cta": "Browse homes",
         },
         {
-            "eyebrow": "Expert guidance",
-            "title": "Shop with a product expert",
-            "description": "Get help with recommendations, fit questions, and placing your next order.",
-            "cta": "Book a session",
+            "eyebrow": "Market view",
+            "title": "Local context at a glance",
+            "description": "Neighborhood cues, price clarity, and property details arranged for quick comparison.",
+            "cta": "View insights",
         },
         {
-            "eyebrow": "Still need help?",
-            "title": "Send an email",
-            "description": "Tell us what is going on and our team will follow up with the next best step.",
-            "cta": "Email support",
+            "eyebrow": "Move-ready",
+            "title": "Shortlists built for action",
+            "description": "Keep decisions moving with saved spaces, priority notes, and clear paths to the next step.",
+            "cta": "Start shortlist",
         },
     ]
     context = {
-        "quick_actions": quick_actions,
-        "contact_options": contact_options,
+        "property_paths": property_paths,
+        "feature_cards": feature_cards,
     }
     return render(request, "pages/home.html", context)

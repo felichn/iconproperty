@@ -4,6 +4,7 @@
     --color-line: #d8d8d8;
     --color-surface: #fff;
     --color-soft: #f7f5f2;
+    --color-accent: #c8102e;
     --max-width: 1180px;
 }
 
@@ -50,7 +51,9 @@ input {
 
 .brand {
     align-items: center;
-    border: 2px solid var(--color-ink);
+    background: var(--color-accent);
+    border: 2px solid var(--color-accent);
+    color: #fff;
     display: inline-flex;
     font-size: 0.82rem;
     height: 42px;
@@ -90,6 +93,7 @@ main {
 
 .kicker,
 .card-eyebrow {
+    color: var(--color-accent);
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -268,6 +272,10 @@ main {
     flex-direction: column;
     min-height: 330px;
     padding: clamp(24px, 4vw, 34px);
+}
+
+.contact-card:hover {
+    border-color: var(--color-accent);
 }
 
 .contact-card h3 {
