@@ -1,0 +1,30 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Icon Property</title>
+    <link rel="stylesheet" href="{% static 'pages/styles.css' %}">
+</head>
+<body>
+    <header class="site-header" aria-label="Primary">
+        <a class="brand" href="{% url 'pages:home' %}" aria-label="Icon Property home">IP</a>
+        <nav class="nav-links" aria-label="Primary navigation">
+            <a href="/inventory/">Inventory</a>
+            <a href="/properties/add/">Add Property</a>
+        </nav>
+    </header>
+
+    <main class="hello-page">
+        <section class="hello-card" aria-labelledby="page-title">
+            <p class="kicker">Icon Property</p>
+            <h1 id="page-title">Hello.</h1>
+            <p class="hero-copy">
+                Welcome to a cleaner property workspace.
+            </p>
+            <a class="button" href="/properties/add/">Add a property</a>
+        </section>
+    </main>
+</body>
+</html>

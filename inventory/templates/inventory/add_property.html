@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Property</title>
+    <link rel="stylesheet" href="{% static 'inventory/styles.css' %}" />
+</head>
+<body class="add-property-page">
+    <header class="add-property-header">
+        <nav class="add-property-nav" aria-label="Property navigation">
+            <a class="brand-mark" href="{% url 'pages:home' %}" aria-label="Icon Property home">IP</a>
+            <a href="{% url 'inventory-page' %}">Inventory</a>
+        </nav>
+        <div class="add-property-hero">
+            <p class="eyebrow">Property entry</p>
+            <h1>Add Property</h1>
+            <p>Create a precise listing record with unit, pricing, dimensions, and owner details.</p>
+        </div>
+    </header>
+    <main>
+        <div id="add-property-root"></div>
+    </main>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel" src="{% static 'inventory/add_property.jsx' %}"></script>
+</body>
+</html>
