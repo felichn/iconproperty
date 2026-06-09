@@ -301,14 +301,13 @@ button:disabled {
 
 .add-property-page .measurement-separator {
   align-items: center;
-  border: 2px solid var(--color-ink);
   display: inline-flex;
   font-size: 1.35rem;
   font-weight: 800;
   height: 52px;
   justify-content: center;
   line-height: 1;
-  min-width: 52px;
+  min-width: 24px;
   text-transform: uppercase;
 }
 
@@ -379,13 +378,12 @@ button:disabled {
 
 .add-property-page .mode-option {
   align-items: center;
-  border: 2px solid var(--color-ink);
   cursor: pointer;
   display: flex;
   gap: 10px;
   margin: 0;
-  min-height: 52px;
-  padding: 12px 14px;
+  min-height: auto;
+  padding: 0;
 }
 
 .add-property-page .mode-option input {
@@ -447,7 +445,7 @@ button:disabled {
   }
 
   .add-property-page .measurement-separator {
-    width: 52px;
+    width: 24px;
   }
 }
 
