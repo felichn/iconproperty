@@ -269,26 +269,28 @@ button:disabled {
 
 .add-property-page .property-form {
   display: grid;
+  justify-items: start;
 }
 
 .add-property-page .form-row {
   display: grid;
   gap: 10px;
+  justify-items: start;
 }
 
 .add-property-page .two-columns,
 .add-property-page .measurement-row {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, max-content);
 }
 
 .add-property-page .measurement-row {
   align-items: end;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: max-content auto max-content;
 }
 
 .add-property-page .price-input {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 150px;
+  display: inline-grid;
+  grid-template-columns: max-content max-content;
 }
 
 .add-property-page .price-input input {
@@ -329,6 +331,13 @@ button:disabled {
   padding: 12px 14px;
 }
 
+.add-property-page input:not([type="radio"]):not([type="file"]),
+.add-property-page select,
+.add-property-page textarea,
+.add-property-page button {
+  width: auto;
+}
+
 .add-property-page textarea {
   min-height: 110px;
 }
@@ -366,6 +375,10 @@ button:disabled {
   gap: 12px;
 }
 
+.add-property-page .actions-inline > * {
+  flex: 0 0 auto;
+}
+
 .add-property-page .form-actions {
   margin-top: 8px;
 }
@@ -373,7 +386,7 @@ button:disabled {
 .add-property-page .mode-options {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, max-content);
 }
 
 .add-property-page .mode-option {
@@ -437,7 +450,7 @@ button:disabled {
   .add-property-page .measurement-row,
   .add-property-page .price-input,
   .add-property-page .mode-options {
-    grid-template-columns: 1fr;
+    grid-template-columns: max-content;
   }
 
   .add-property-page .price-input input {
