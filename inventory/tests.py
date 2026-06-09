@@ -1,10 +1,8 @@
 import json
 import tempfile
-from io import BytesIO
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
-from PIL import Image
 
 from .models import Property, PropertyPhoto
 
@@ -14,12 +12,11 @@ TEST_MEDIA_ROOT = tempfile.mkdtemp(prefix="inventory_test_media_")
 
 @override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT, MEDIA_URL="/media/")
 class PropertyApiTests(TestCase):
-    def _build_test_image(self, color=(255, 100, 100)):
-        image_bytes = BytesIO()
-        image = Image.new("RGB", (120, 80), color=color)
-        image.save(image_bytes, format="JPEG")
+    def _build_test_image(self, name="sample.jpg"):
         return SimpleUploadedFile(
-            "sample.jpg", image_bytes.getvalue(), content_type="image/jpeg"
+            name,
+            b"test image bytes",
+            content_type="image/jpeg",
         )
 
     def setUp(self):
@@ -178,7 +175,7 @@ class PropertyApiTests(TestCase):
         listing = Property.objects.first()
         PropertyPhoto.objects.create(property=listing, image=self._build_test_image())
         PropertyPhoto.objects.create(
-            property=listing, image=self._build_test_image(color=(50, 150, 220))
+            property=listing, image=self._build_test_image(name="sample-2.jpg")
         )
 
         response = self.client.get(f"/api/properties/{listing.id}/download-photos/")

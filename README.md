@@ -15,7 +15,6 @@ This project provides a property inventory management system for real estate wor
 - Django backend + templating
 - React frontend (served in-browser via CDN)
 - SQLite database
-- Pillow (used in image-related tests)
 
 ## Setup
 
