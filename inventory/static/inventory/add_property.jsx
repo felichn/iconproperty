@@ -12,12 +12,34 @@ const defaultForm = {
   block: "",
   unit_no: "",
   price: "",
+  price_unit: "juta",
   width: "",
   length: "",
   floors: 1,
   area: "Villa Pasir Putih",
-  owner_whatsapp_number: "",
+  owner_whatsapp_number: "+62",
 };
+
+function expandPriceValue(amount, unit) {
+  const normalizedAmount = String(amount).trim().replace(/,/g, ".");
+  if (!normalizedAmount || Number(normalizedAmount) <= 0) {
+    throw new Error("Harga is required.");
+  }
+
+  const [rawWholePart, decimalPart = ""] = normalizedAmount.split(".");
+  const wholePart = rawWholePart || "0";
+  if (!/^\d+$/.test(wholePart) || (decimalPart && !/^\d+$/.test(decimalPart))) {
+    throw new Error("Harga must be a valid number.");
+  }
+
+  const multiplier = unit === "milyar" ? "1000000000" : "1000000";
+  const decimals = decimalPart.length;
+  const combinedDigits = `${wholePart}${decimalPart}`.replace(/^0+(?=\d)/, "");
+  const expanded = BigInt(combinedDigits || "0") * BigInt(multiplier);
+  const divisor = 10n ** BigInt(decimals);
+
+  return (expanded / divisor).toString();
+}
 
 function AddPropertyApp() {
   const [formData, setFormData] = useState(defaultForm);
@@ -43,10 +65,13 @@ function AddPropertyApp() {
     setStatusMessage("");
     setSaving(true);
     try {
+      const { price_unit, ...payload } = formData;
+      payload.price = expandPriceValue(formData.price, price_unit);
+
       const response = await fetch("/api/properties/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -163,13 +188,23 @@ function AddPropertyApp() {
 
         <div className="form-row">
           <label>Harga</label>
-          <input
-            type="number"
-            step="0.01"
-            value={formData.price}
-            onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
-            required
-          />
+          <div className="price-input">
+            <input
+              type="number"
+              step="0.01"
+              value={formData.price}
+              onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
+              required
+            />
+            <select
+              aria-label="Harga unit"
+              value={formData.price_unit}
+              onChange={(e) => setFormData((prev) => ({ ...prev, price_unit: e.target.value }))}
+            >
+              <option value="juta">Juta</option>
+              <option value="milyar">Milyar</option>
+            </select>
+          </div>
         </div>
 
         <div className="form-row measurement-row">

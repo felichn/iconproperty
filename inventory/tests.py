@@ -225,6 +225,8 @@ class PropertyApiTests(TestCase):
         for label in (
             "Rent or Sell",
             "Harga",
+            "Juta",
+            "Milyar",
             "Width",
             "Length",
             "Lantai",
@@ -232,4 +234,7 @@ class PropertyApiTests(TestCase):
             "Attach Photos",
         ):
             self.assertIn(label, script)
+        self.assertIn('owner_whatsapp_number: "+62"', script)
+        self.assertIn("expandPriceValue(formData.price, price_unit)", script)
+        self.assertIn('unit === "milyar" ? "1000000000" : "1000000"', script)
         self.assertNotIn("Description", script)
