@@ -1,5 +1,6 @@
 import json
 import tempfile
+from pathlib import Path
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
@@ -184,6 +185,23 @@ class PropertyApiTests(TestCase):
         self.assertEqual(response["Content-Type"], "application/zip")
         self.assertIn("attachment;", response["Content-Disposition"])
 
+    def test_photo_upload_attaches_files_to_property(self):
+        listing = Property.objects.first()
+
+        response = self.client.post(
+            f"/api/properties/{listing.id}/photos/",
+            data={
+                "photos": [
+                    self._build_test_image(name="front.jpg"),
+                    self._build_test_image(name="kitchen.jpg"),
+                ]
+            },
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(listing.photos.count(), 2)
+        self.assertEqual(len(response.json()["photos"]), 2)
+
     def test_property_public_page_shows_photo_gallery(self):
         listing = Property.objects.first()
         PropertyPhoto.objects.create(property=listing, image=self._build_test_image())
@@ -198,3 +216,20 @@ class PropertyApiTests(TestCase):
         response = self.client.get("/properties/add/")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Add Property")
+        self.assertContains(response, "add-property-page")
+
+    def test_add_property_form_script_has_requested_labels(self):
+        script_path = Path(__file__).resolve().parent / "static/inventory/add_property.jsx"
+        script = script_path.read_text()
+
+        for label in (
+            "Rent or Sell",
+            "Harga",
+            "Width",
+            "Length",
+            "Lantai",
+            "Contact",
+            "Attach Photos",
+        ):
+            self.assertIn(label, script)
+        self.assertNotIn("Description", script)

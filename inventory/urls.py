@@ -22,6 +22,11 @@ urlpatterns = [
         name="property-share-links-api",
     ),
     path(
+        "api/properties/<int:property_id>/photos/",
+        views.property_photo_collection_api,
+        name="property-photo-collection-api",
+    ),
+    path(
         "api/properties/<int:property_id>/download-photos/",
         views.property_photo_download_api,
         name="property-photo-download-api",

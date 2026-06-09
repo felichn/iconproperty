@@ -287,6 +287,24 @@ def property_photo_delete_api(request, photo_id):
     return JsonResponse({"deleted": True})
 
 
+@require_http_methods(["POST"])
+@csrf_exempt
+def property_photo_collection_api(request, property_id):
+    property_obj = get_object_or_404(Property, pk=property_id)
+    uploaded_files = request.FILES.getlist("photos")
+    if not uploaded_files:
+        return JsonResponse({"error": "At least one photo is required."}, status=400)
+
+    photos = [
+        PropertyPhoto.objects.create(property=property_obj, image=uploaded_file)
+        for uploaded_file in uploaded_files
+    ]
+    return JsonResponse(
+        {"photos": [_serialize_photo(photo, request) for photo in photos]},
+        status=201,
+    )
+
+
 @require_http_methods(["GET"])
 @csrf_exempt
 def property_share_links_api(request, property_id):

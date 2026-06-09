@@ -262,8 +262,41 @@ button:disabled {
   margin: 0 0 26px;
 }
 
-.add-property-page .grid {
+.add-property-page .grid,
+.add-property-page .property-form {
   gap: 18px;
+}
+
+.add-property-page .property-form {
+  display: grid;
+}
+
+.add-property-page .form-row {
+  display: grid;
+  gap: 10px;
+}
+
+.add-property-page .two-columns,
+.add-property-page .measurement-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.add-property-page .measurement-row {
+  align-items: end;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.add-property-page .measurement-separator {
+  align-items: center;
+  border: 2px solid var(--color-ink);
+  display: inline-flex;
+  font-size: 1.35rem;
+  font-weight: 800;
+  height: 52px;
+  justify-content: center;
+  line-height: 1;
+  min-width: 52px;
+  text-transform: uppercase;
 }
 
 .add-property-page label {
@@ -319,6 +352,85 @@ button:disabled {
 
 .add-property-page .actions-inline {
   gap: 12px;
+}
+
+.add-property-page .form-actions {
+  margin-top: 8px;
+}
+
+.add-property-page .mode-options {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.add-property-page .mode-option {
+  align-items: center;
+  border: 2px solid var(--color-ink);
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  min-height: 52px;
+  padding: 12px 14px;
+}
+
+.add-property-page .mode-option input {
+  min-height: auto;
+  padding: 0;
+  width: auto;
+}
+
+.add-property-page .photo-attach {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.add-property-page .photo-attach input[type="file"] {
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.add-property-page .attach-button {
+  align-items: center;
+  background: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  margin: 0;
+  min-height: 52px;
+  padding: 12px 18px;
+}
+
+.add-property-page .attach-button:hover,
+.add-property-page .attach-button:focus-within {
+  background: #fff;
+  color: var(--color-ink);
+}
+
+.add-property-page .photo-attach span {
+  color: var(--color-muted);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 720px) {
+  .add-property-page .two-columns,
+  .add-property-page .measurement-row,
+  .add-property-page .mode-options {
+    grid-template-columns: 1fr;
+  }
+
+  .add-property-page .measurement-separator {
+    width: 52px;
+  }
 }
 
 .add-property-page .status-error,

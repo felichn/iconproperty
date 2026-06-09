@@ -17,11 +17,11 @@ const defaultForm = {
   floors: 1,
   area: "Villa Pasir Putih",
   owner_whatsapp_number: "",
-  description: "",
 };
 
 function AddPropertyApp() {
   const [formData, setFormData] = useState(defaultForm);
+  const [photos, setPhotos] = useState([]);
   const [statusMessage, setStatusMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [saving, setSaving] = useState(false);
@@ -52,13 +52,28 @@ function AddPropertyApp() {
       if (!response.ok) {
         throw new Error(data.error || "Failed to create property.");
       }
+      if (photos.length > 0) {
+        const photoPayload = new FormData();
+        photos.forEach((photo) => photoPayload.append("photos", photo));
+        const photoResponse = await fetch(`/api/properties/${data.id}/photos/`, {
+          method: "POST",
+          body: photoPayload,
+        });
+        const photoData = await photoResponse.json();
+        if (!photoResponse.ok) {
+          throw new Error(photoData.error || "Property saved, but photos could not be attached.");
+        }
+      }
       setFormData({
         ...defaultForm,
         property_type: formData.property_type,
         listing_mode: formData.listing_mode,
         area: (areaOptionsByPropertyType[formData.property_type] || [""])[0],
       });
-      setStatusMessage(`Unit "${data.unit}" created successfully.`);
+      setPhotos([]);
+      event.target.reset();
+      const photoMessage = photos.length === 1 ? " with 1 photo" : photos.length > 1 ? ` with ${photos.length} photos` : "";
+      setStatusMessage(`Unit "${data.unit}" created successfully${photoMessage}.`);
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
@@ -70,60 +85,84 @@ function AddPropertyApp() {
     <section className="panel">
       <p className="eyebrow">Listing details</p>
       <h2>Property Information</h2>
-      <form onSubmit={createProperty} className="grid columns-4">
-        <div>
-          <label>Type</label>
-          <select
-            value={formData.property_type}
-            onChange={(e) => {
-              const selectedType = e.target.value;
-              const areaOptions = areaOptionsByPropertyType[selectedType] || [];
-              setFormData((prev) => ({
-                ...prev,
-                property_type: selectedType,
-                area: areaOptions[0] || "",
-              }));
-            }}
-          >
-            {propertyTypeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
+      <form onSubmit={createProperty} className="property-form">
+        <div className="form-row">
+          <label>Rent or Sell</label>
+          <div className="mode-options">
+            {listingModeOptions.map((option) => (
+              <label key={option.value} className="mode-option">
+                <input
+                  type="radio"
+                  name="listing_mode"
+                  value={option.value}
+                  checked={formData.listing_mode === option.value}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, listing_mode: e.target.value }))}
+                />
+                <span>{option.label}</span>
+              </label>
             ))}
-          </select>
+          </div>
         </div>
-        <div>
-          <label>Area</label>
-          <select
-            value={formData.area}
-            onChange={(e) => setFormData((prev) => ({ ...prev, area: e.target.value }))}
-            required
-          >
-            {(areaOptionsByPropertyType[formData.property_type] || []).map((areaOption) => (
-              <option key={areaOption} value={areaOption}>
-                {areaOption}
-              </option>
-            ))}
-          </select>
+
+        <div className="form-row two-columns">
+          <div>
+            <label>Type</label>
+            <select
+              value={formData.property_type}
+              onChange={(e) => {
+                const selectedType = e.target.value;
+                const areaOptions = areaOptionsByPropertyType[selectedType] || [];
+                setFormData((prev) => ({
+                  ...prev,
+                  property_type: selectedType,
+                  area: areaOptions[0] || "",
+                }));
+              }}
+            >
+              {propertyTypeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label>Area</label>
+            <select
+              value={formData.area}
+              onChange={(e) => setFormData((prev) => ({ ...prev, area: e.target.value }))}
+              required
+            >
+              {(areaOptionsByPropertyType[formData.property_type] || []).map((areaOption) => (
+                <option key={areaOption} value={areaOption}>
+                  {areaOption}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div>
-          <label>Blok</label>
-          <input
-            value={formData.block}
-            onChange={(e) => setFormData((prev) => ({ ...prev, block: e.target.value }))}
-            required
-          />
+
+        <div className="form-row two-columns">
+          <div>
+            <label>Blok</label>
+            <input
+              value={formData.block}
+              onChange={(e) => setFormData((prev) => ({ ...prev, block: e.target.value }))}
+              required
+            />
+          </div>
+          <div>
+            <label>No.</label>
+            <input
+              value={formData.unit_no}
+              onChange={(e) => setFormData((prev) => ({ ...prev, unit_no: e.target.value }))}
+              required
+            />
+          </div>
         </div>
-        <div>
-          <label>No.</label>
-          <input
-            value={formData.unit_no}
-            onChange={(e) => setFormData((prev) => ({ ...prev, unit_no: e.target.value }))}
-            required
-          />
-        </div>
-        <div>
-          <label>Price</label>
+
+        <div className="form-row">
+          <label>Harga</label>
           <input
             type="number"
             step="0.01"
@@ -132,28 +171,33 @@ function AddPropertyApp() {
             required
           />
         </div>
-        <div>
-          <label>Width</label>
-          <input
-            type="number"
-            step="0.01"
-            value={formData.width}
-            onChange={(e) => setFormData((prev) => ({ ...prev, width: e.target.value }))}
-            required
-          />
+
+        <div className="form-row measurement-row">
+          <div>
+            <label>Width</label>
+            <input
+              type="number"
+              step="0.01"
+              value={formData.width}
+              onChange={(e) => setFormData((prev) => ({ ...prev, width: e.target.value }))}
+              required
+            />
+          </div>
+          <span aria-hidden="true" className="measurement-separator">x</span>
+          <div>
+            <label>Length</label>
+            <input
+              type="number"
+              step="0.01"
+              value={formData.length}
+              onChange={(e) => setFormData((prev) => ({ ...prev, length: e.target.value }))}
+              required
+            />
+          </div>
         </div>
-        <div>
-          <label>Length</label>
-          <input
-            type="number"
-            step="0.01"
-            value={formData.length}
-            onChange={(e) => setFormData((prev) => ({ ...prev, length: e.target.value }))}
-            required
-          />
-        </div>
-        <div>
-          <label>Floors</label>
+
+        <div className="form-row">
+          <label>Lantai</label>
           <input
             type="number"
             min="1"
@@ -162,41 +206,32 @@ function AddPropertyApp() {
             required
           />
         </div>
-        <div>
-          <label>Owner WhatsApp</label>
+
+        <div className="form-row">
+          <label>Contact</label>
           <input
             value={formData.owner_whatsapp_number}
             onChange={(e) => setFormData((prev) => ({ ...prev, owner_whatsapp_number: e.target.value }))}
             required
           />
         </div>
-        <div style={{ gridColumn: "1 / -1" }}>
-          <label>Description</label>
-          <textarea
-            rows="3"
-            value={formData.description}
-            onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-          />
-        </div>
-        <div style={{ gridColumn: "1 / -1" }}>
-          <label>Rent or Sell</label>
-          <div className="actions-inline">
-            {listingModeOptions.map((option) => (
-              <label key={option.value} style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: 0 }}>
-                <input
-                  type="radio"
-                  name="listing_mode"
-                  value={option.value}
-                  checked={formData.listing_mode === option.value}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, listing_mode: e.target.value }))}
-                  style={{ width: "auto" }}
-                />
-                {option.label}
-              </label>
-            ))}
+
+        <div className="form-row">
+          <label>Photos</label>
+          <div className="photo-attach">
+            <label className="attach-button" htmlFor="property-photos">Attach Photos</label>
+            <input
+              id="property-photos"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => setPhotos(Array.from(e.target.files || []))}
+            />
+            <span>{photos.length ? `${photos.length} selected` : "No photos selected"}</span>
           </div>
         </div>
-        <div className="actions-inline">
+
+        <div className="actions-inline form-actions">
           <button type="submit" disabled={saving}>
             {saving ? "Saving..." : "Save Property"}
           </button>
